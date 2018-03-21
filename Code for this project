@@ -1,0 +1,50 @@
+var mapimg;
+var clat = 0;
+var clon = 0;
+var lat = 0;
+var lon = 0;
+var zoom = 1;
+function preload(){
+  mapimg = loadImage("Apikey from mapbox goes here");
+}
+function askISS(){
+  loadJSON("http://api.open-notify.org/iss-now.json",gotData, 'jsonp');
+}
+function gotData(data){
+  lat = data.iss_position.latitude;
+  lon = data.iss_position.longitude;
+  print(lat+" "+lon);
+  console.log("update?")
+}
+function setup(){
+  createCanvas(1024, 512);
+  translate(width / 2, height /2);
+  imageMode(CENTER);
+
+image(mapimg, 0,0);
+  setInterval(askISS,1000);
+}
+function mercX(lon){
+  lon = radians(lon);
+  var a = (256 / PI) * pow(2, zoom);
+  var b = lon + PI;
+  return a * b;
+}
+function mercY(lat){
+  lat = radians(lat);
+  var a = (256 / PI) * pow(2, zoom);
+  var b = tan(PI / 4 + lat / 2);
+  var c = PI - log(b);
+  return a * c;
+}
+function draw(){
+  translate(width / 2, height /2);
+  var cy = mercY(clat);
+  var cx = mercX(clon);
+  var y = mercY(lat) - cy;
+  var x = mercX(lon) - cx;
+  fill( 255, 0, 255, 200);
+  if(frameCount> 100){
+    ellipse(x, y, 20, 20);
+  }
+}
